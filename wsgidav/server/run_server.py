@@ -51,6 +51,7 @@ try:
     from wsgidav.version import __version__
     from wsgidav.wsgidav_app import WsgiDAVApp
     from wsgidav.fs_dav_provider import FilesystemProvider
+    from wsgidav.mytardis_dav_provider import MyTardisProvider
 except ImportError, e:
     raise RuntimeError("Could not import wsgidav package:\n%s\nSee http://wsgidav.googlecode.com/." % e)
 
