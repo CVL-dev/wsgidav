@@ -8,7 +8,7 @@ ReadOnlyFilesystemProvider implements a DAV resource provider that publishes
 a file system for read-only access.
 Write attempts will raise HTTP_FORBIDDEN.
 
-FilesystemProvider inherits from ReadOnlyFilesystemProvider and implements the
+MyTardisProvider inherits from ReadOnlyFilesystemProvider and implements the
 missing write access functionality. 
 
 See `Developers info`_ for more information about the WsgiDAV architecture.
@@ -323,14 +323,14 @@ class FolderResource(DAVCollection):
 
     
 #===============================================================================
-# FilesystemProvider
+# MyTardisProvider
 #===============================================================================
-class FilesystemProvider(DAVProvider):
+class MyTardisProvider(DAVProvider):
 
     def __init__(self, rootFolderPath, readonly=False):
         if not rootFolderPath or not os.path.exists(rootFolderPath):
             raise ValueError("Invalid root path: %s" % rootFolderPath)
-        super(FilesystemProvider, self).__init__()
+        super(MyTardisProvider, self).__init__()
         self.rootFolderPath = os.path.abspath(rootFolderPath)
         self.readonly = readonly
 
