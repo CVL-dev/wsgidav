@@ -69,6 +69,8 @@ class WsgiDAVDomainController(object):
         available for general access."""
         # TODO: Should check for --allow_anonymous?
 #        assert realmname in environ["wsgidav.config"]["user_mapping"], "Currently there must be at least on user mapping for this realm"
+        if not environ["wsgidav.config"]["allow_anonymous"]:
+            return True
         return realmname in self.userMap
     
     

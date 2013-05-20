@@ -127,6 +127,10 @@ If no config file is found, a default FilesystemProvider is used."""
                       action="store_true", dest="reload", 
                       help="Restart server when source files are changed. Used by run_reloading_server. (Requires paste.reloader.)")
 
+    parser.add_option("", "--allow_anonymous",
+                      dest="allow_anonymous", 
+                      help="If no users are specified in wsgidav.conf when using the default domain controller, anonymous access will be allowed by default.  Set this option to False to disable anonymous access.")
+
 #    parser.add_option("", "--profile",
 #                      action="store_true", dest="profile", 
 #                      help="Profile ")
@@ -243,6 +247,13 @@ def _initConfig():
             reloader.watch_file(config_file)
 #        import pydevd
 #        pydevd.settrace()
+
+    if cmdLineOpts.get("allow_anonymous"):
+        allow_anonymous = cmdLineOpts.get("allow_anonymous")
+        if allow_anonymous.strip().lower()=="true" or allow_anonymous.strip().lower()=="yes":
+            config["allow_anonymous"] = True
+        else:
+            config["allow_anonymous"] = False
 
     return config
 

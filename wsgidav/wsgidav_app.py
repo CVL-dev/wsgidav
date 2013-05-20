@@ -88,6 +88,7 @@ DEFAULT_CONFIG = {
     "acceptbasic": True,      # Allow basic authentication, True or False
     "acceptdigest": True,     # Allow digest authentication, True or False
     "defaultdigest": True,    # True (default digest) or False (default basic)
+    "allow_anonymous": True,  # Allow anonymous access if no users are specified in config.
     
     # Verbose Output
     "verbose": 2,        # 0 - no output (excepting application exceptions)         
@@ -209,7 +210,8 @@ class WsgiDAVApp(object):
             for share in self.providerMap:
                 if not user_mapping.get(share):
                     # TODO: we should only warn here, if --no-auth is not given
-                    print "WARNING: share '%s' will allow anonymous access." % share
+                    if config["allow_anonymous"]:
+                        print "WARNING: share '%s' will allow anonymous access." % share
 
         # Define WSGI application stack
         application = RequestResolver()
