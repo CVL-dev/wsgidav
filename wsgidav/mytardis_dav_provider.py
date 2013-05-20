@@ -89,14 +89,8 @@ class FileResource(DAVNonCollection):
          
         See DAVResource.beginWrite()
         """
-        assert not self.isCollection
-        if self.provider.readonly:
-            raise DAVError(HTTP_FORBIDDEN)               
-        mode = "wb"
-        if contentType and contentType.startswith("text"):
-            mode = "w"
-        _logger.debug("beginWrite: %s, %s" % (self._filePath, mode))
-        return file(self._filePath, mode, BUFFER_SIZE)
+        # self.provider.readonly is always True for MyTardis provider
+        raise DAVError(HTTP_FORBIDDEN)               
 
     
     def delete(self):
@@ -104,31 +98,14 @@ class FileResource(DAVNonCollection):
         
         See DAVResource.delete()
         """
-        if self.provider.readonly:
-            raise DAVError(HTTP_FORBIDDEN)               
-        os.unlink(self._filePath)
-        self.removeAllProperties(True)
-        self.removeAllLocks(True)
+        # self.provider.readonly is always True for MyTardis provider
+        raise DAVError(HTTP_FORBIDDEN)               
             
 
     def copyMoveSingle(self, destPath, isMove):
         """See DAVResource.copyMoveSingle() """
-        if self.provider.readonly:
-            raise DAVError(HTTP_FORBIDDEN)               
-        fpDest = self.provider._locToFilePath(destPath)
-        assert not util.isEqualOrChildUri(self.path, destPath)
-        # Copy file (overwrite, if exists)
-        shutil.copy2(self._filePath, fpDest)
-        # (Live properties are copied by copy2 or copystat)
-        # Copy dead properties
-        propMan = self.provider.propManager
-        if propMan:
-            destRes = self.provider.getResourceInst(destPath, self.environ)
-            if isMove:
-                propMan.moveProperties(self.getRefUrl(), destRes.getRefUrl(), 
-                                       withChildren=False)
-            else:
-                propMan.copyProperties(self.getRefUrl(), destRes.getRefUrl())
+        # self.provider.readonly is always True for MyTardis provider
+        raise DAVError(HTTP_FORBIDDEN)               
                
 
     def supportRecursiveMove(self, destPath):
@@ -138,20 +115,8 @@ class FileResource(DAVNonCollection):
     
     def moveRecursive(self, destPath):
         """See DAVResource.moveRecursive() """
-        if self.provider.readonly:
-            raise DAVError(HTTP_FORBIDDEN)               
-        fpDest = self.provider._locToFilePath(destPath)
-        assert not util.isEqualOrChildUri(self.path, destPath)
-        assert not os.path.exists(fpDest)
-        _logger.debug("moveRecursive(%s, %s)" % (self._filePath, fpDest))
-        shutil.move(self._filePath, fpDest)
-        # (Live properties are copied by copy2 or copystat)
-        # Move dead properties
-        if self.provider.propManager:
-            destRes = self.provider.getResourceInst(destPath, self.environ)
-            self.provider.propManager.moveProperties(self.getRefUrl(), destRes.getRefUrl(), 
-                                                     withChildren=True)
-               
+        # self.provider.readonly is always True for MyTardis provider
+        raise DAVError(HTTP_FORBIDDEN)               
 
 
     
@@ -237,14 +202,8 @@ class FolderResource(DAVCollection):
         
         See DAVResource.createEmptyResource()
         """
-        assert not "/" in name
-        if self.provider.readonly:
-            raise DAVError(HTTP_FORBIDDEN)               
-        path = util.joinUri(self.path, name) 
-        fp = self.provider._locToFilePath(path)
-        f = open(fp, "w")
-        f.close()
-        return self.provider.getResourceInst(path, self.environ)
+        # self.provider.readonly is always True for MyTardis provider
+        raise DAVError(HTTP_FORBIDDEN)               
     
 
     def createCollection(self, name):
@@ -252,12 +211,8 @@ class FolderResource(DAVCollection):
         
         See DAVResource.createCollection()
         """
-        assert not "/" in name
-        if self.provider.readonly:
-            raise DAVError(HTTP_FORBIDDEN)               
-        path = util.joinUri(self.path, name) 
-        fp = self.provider._locToFilePath(path)
-        os.mkdir(fp)
+        # self.provider.readonly is always True for MyTardis provider
+        raise DAVError(HTTP_FORBIDDEN)               
 
 
     def delete(self):
@@ -265,38 +220,13 @@ class FolderResource(DAVCollection):
         
         See DAVResource.delete()
         """
-        if self.provider.readonly:
-            raise DAVError(HTTP_FORBIDDEN)               
-        shutil.rmtree(self._filePath, ignore_errors=False)
-        self.removeAllProperties(True)
-        self.removeAllLocks(True)
-            
+        # self.provider.readonly is always True for MyTardis provider
+        raise DAVError(HTTP_FORBIDDEN)               
 
     def copyMoveSingle(self, destPath, isMove):
         """See DAVResource.copyMoveSingle() """
-        if self.provider.readonly:
-            raise DAVError(HTTP_FORBIDDEN)               
-        fpDest = self.provider._locToFilePath(destPath)
-        assert not util.isEqualOrChildUri(self.path, destPath)
-        # Create destination collection, if not exists
-        if not os.path.exists(fpDest):
-            os.mkdir(fpDest)
-        try:
-            # may raise: [Error 5] Permission denied: u'C:\\temp\\litmus\\ccdest'
-            shutil.copystat(self._filePath, fpDest)
-        except Exception, e:
-            _logger.debug("Could not copy folder stats: %s" % e)
-        # (Live properties are copied by copy2 or copystat)
-        # Copy dead properties
-        propMan = self.provider.propManager
-        if propMan:
-            destRes = self.provider.getResourceInst(destPath, self.environ)
-            if isMove:
-                propMan.moveProperties(self.getRefUrl(), destRes.getRefUrl(), 
-                                       withChildren=False)
-            else:
-                propMan.copyProperties(self.getRefUrl(), destRes.getRefUrl())
-               
+        # self.provider.readonly is always True for MyTardis provider
+        raise DAVError(HTTP_FORBIDDEN)               
 
     def supportRecursiveMove(self, destPath):
         """Return True, if moveRecursive() is available (see comments there)."""
@@ -305,20 +235,8 @@ class FolderResource(DAVCollection):
     
     def moveRecursive(self, destPath):
         """See DAVResource.moveRecursive() """
-        if self.provider.readonly:
-            raise DAVError(HTTP_FORBIDDEN)               
-        fpDest = self.provider._locToFilePath(destPath)
-        assert not util.isEqualOrChildUri(self.path, destPath)
-        assert not os.path.exists(fpDest)
-        _logger.debug("moveRecursive(%s, %s)" % (self._filePath, fpDest))
-        shutil.move(self._filePath, fpDest)
-        # (Live properties are copied by copy2 or copystat)
-        # Move dead properties
-        if self.provider.propManager:
-            destRes = self.provider.getResourceInst(destPath, self.environ)
-            self.provider.propManager.moveProperties(self.getRefUrl(), destRes.getRefUrl(), 
-                                                     withChildren=True)
-               
+        # self.provider.readonly is always True for MyTardis provider
+        raise DAVError(HTTP_FORBIDDEN)               
 
 
     
