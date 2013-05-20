@@ -162,6 +162,9 @@ class FolderResource(DAVCollection):
         # instead of a special character. The name would then be unusable to
         # build a distinct URL that references this resource.
 
+        username = self.environ['http_authenticator.username']
+        pathComponents = self.environ['PATH_INFO'].strip("/").split("/")
+
         nameList = []
         # self._filePath is unicode, so os.listdir returns unicode as well
         assert isinstance(self._filePath, unicode) 
@@ -171,6 +174,12 @@ class FolderResource(DAVCollection):
             fp = os.path.join(self._filePath, name)
             if not os.path.isdir(fp) and not os.path.isfile(fp):
                 _logger.debug("Skipping non-file %s" % fp)
+                continue
+            # If browsing the root directory of the share, i.e.
+            # /opt/mytardis/current/var/store/
+            # then only display experiment folders, belonging 
+            # to the current user:
+            if pathComponents[0]=="" and name not in getExperimentIDs(username):
                 continue
             name = name.encode("utf8")
             nameList.append(name)
@@ -279,6 +288,15 @@ class MyTardisProvider(DAVProvider):
 
         See DAVProvider.getResourceInst()
         """
+
+        username = environ['http_authenticator.username']
+        pathComponents = path.strip("/").split("/")
+
+        # If the user requests a URL for another user's experiment,
+        # raise a 403 Forbidden exception.
+        if pathComponents[0]!="" and pathComponents[0] not in getExperimentIDs(username):
+            raise DAVError(HTTP_FORBIDDEN)               
+
         self._count_getResourceInst += 1
         fp = self._locToFilePath(path)
         if not os.path.exists(fp):
@@ -287,3 +305,12 @@ class MyTardisProvider(DAVProvider):
         if os.path.isdir(fp):
             return FolderResource(path, environ, fp)
         return FileResource(path, environ, fp)
+
+def getExperimentIDs(username):
+    # Eventually this will interact with the MyTardis database.
+    # The hard-coded values below are just a placeholder.
+    if username=="one":
+        return ("1",)
+    if username=="two":
+        return ("2",)
+
