@@ -207,12 +207,27 @@ class HTTPAuthenticator(object):
         authvalue = authvalue.strip().decode("base64")
         username, password = authvalue.split(":",1)
         
-        if self._domaincontroller.authDomainUser(realmname, username, password, environ):
+        #if self._domaincontroller.authDomainUser(realmname, username, password, environ):
+        if self.isValidMyTardisUsernameAndPassword(realmname, username, password, environ):
             environ["http_authenticator.realm"] = realmname
             environ["http_authenticator.username"] = username
             return self._application(environ, start_response)
+        else:
+            _logger.warning("Authentication failed for user '%s', realm '%s'" % (username, realmname))
         return self.sendBasicAuthResponse(environ, start_response)
-        
+
+    def isValidMyTardisUsernameAndPassword(self, realmname, username, password, environ):
+        # Eventually, this will interact with MyTardis or one of its authentication providers.
+        # But for now, we will just hard-code some usernames and passwords, as a placeholder.
+
+        if username=="one" and password=="one":
+            return True
+        if username=="two" and password=="two":
+            return True
+        if username=="three" and password=="three":
+            return True
+
+        return False
 
     def sendDigestAuthResponse(self, environ, start_response):    
         realmname = self._domaincontroller.getDomainRealm(environ["PATH_INFO"] , environ)
