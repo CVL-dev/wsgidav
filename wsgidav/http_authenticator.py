@@ -218,19 +218,7 @@ class HTTPAuthenticator(object):
 
     def isValidMyTardisUsernameAndPassword(self, realmname, username, password, environ):
 
-        import os
-        import sys
-
-        sys.path.append("/opt/mytardis/current/")
-        for egg in os.listdir("/opt/mytardis/current/eggs/"):
-            sys.path.append("/opt/mytardis/current/eggs/" + egg)
-
-        from django.core.management import setup_environ
-        from tardis import settings
-        setup_environ(settings)
-
         from tardis.tardis_portal.auth.localdb_auth import auth_key as localdb_auth_key
-
         from django.test.client import Client
 
         client = Client()

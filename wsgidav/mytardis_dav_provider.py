@@ -23,7 +23,14 @@ import os
 import mimetypes
 import shutil
 import stat
+import sys
 
+sys.path.append("/opt/mytardis/current/")
+for egg in os.listdir("/opt/mytardis/current/eggs/"):
+    sys.path.append("/opt/mytardis/current/eggs/" + egg)
+from django.core.management import setup_environ
+from tardis import settings
+setup_environ(settings)
 
 __docformat__ = "reStructuredText"
 
