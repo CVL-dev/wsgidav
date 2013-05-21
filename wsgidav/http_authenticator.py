@@ -217,7 +217,6 @@ class HTTPAuthenticator(object):
         return self.sendBasicAuthResponse(environ, start_response)
 
     def isValidMyTardisUsernameAndPassword(self, realmname, username, password, environ):
-    def isValidMyTardisUsernameAndPassword(self, realmname, username, password, environ):
 
         import os
         import sys
