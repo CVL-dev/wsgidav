@@ -1,7 +1,12 @@
 Using WsgiDav with SSL
 ======================
 
-The default server used with WsgiDav's standalone executable is CherryPy.
+The default server used with WsgiDav's standalone executable is CherryPy's WSGI server.  For more details, see wsgidav/server/cherrypy_wsgiserver/__init__.py :
+
+    This won't call the CherryPy engine (application side) at all, only the
+    WSGI server, which is independant from the rest of CherryPy. Don't
+    let the name "CherryPyWSGIServer" throw you; the name merely reflects
+    its origin, not its coupling.
 
 We can enable SSL in CherryPy as follows:
 
@@ -11,6 +16,8 @@ python-pip install pyopenssl
 yum -y install openssl
 # Generate self-signed certificate:
 openssl req -x509 -newkey rsa:2048 -keyout server.key -out server.crt -days 3650 -nodes
+
+vi wsgidav/server/run_server.py
 
 index 0e4e0b4..5ab73dd 100644
 --- a/wsgidav/server/run_server.py
