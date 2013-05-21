@@ -342,6 +342,10 @@ def _runCherryPy(app, config, mode):
             app,
 #            server_name=version
             )
+
+        server.ssl_certificate = "/opt/mytardis/current/wsgidav/ssl/server.crt"
+        server.ssl_private_key = "/opt/mytardis/current/wsgidav/ssl/server.key"
+
         server.start()
     except ImportError, e:
         if config["verbose"] >= 1:
