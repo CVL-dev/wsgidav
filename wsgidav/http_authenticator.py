@@ -218,7 +218,6 @@ class HTTPAuthenticator(object):
 
     def isValidMyTardisUsernameAndPassword(self, realmname, username, password, environ):
 
-        from tardis.tardis_portal.auth.localdb_auth import auth_key as localdb_auth_key
         from django.test.client import Client
 
         client = Client()
