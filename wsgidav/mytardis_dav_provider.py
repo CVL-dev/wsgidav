@@ -313,12 +313,22 @@ class MyTardisProvider(DAVProvider):
             return FolderResource(path, environ, fp)
         return FileResource(path, environ, fp)
 
-def getExperimentIDs(username):
-    # Eventually this will interact with the MyTardis database.
-    # The hard-coded values below are just a placeholder.
-    if username=="one":
-        return ("1",)
-    if username=="two":
-        return ("2",)
-    return ()
+def getExperimentIDs(webdav_username):
+
+    from django.contrib.auth.models import User
+
+    mytardis_user = User.objects.get(username=webdav_username)
+
+    from tardis.tardis_portal.models.experiment import ExperimentACL
+
+    acl = ExperimentACL.objects.filter(
+        pluginId='django_user',
+        entityId=str(mytardis_user.id))
+
+    experimentIDs = ()
+
+    for item in acl:
+        experimentIDs = experimentIDs + (str(item.experiment.id),)
+
+    return experimentIDs
 
