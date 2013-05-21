@@ -217,17 +217,49 @@ class HTTPAuthenticator(object):
         return self.sendBasicAuthResponse(environ, start_response)
 
     def isValidMyTardisUsernameAndPassword(self, realmname, username, password, environ):
-        # Eventually, this will interact with MyTardis or one of its authentication providers.
-        # But for now, we will just hard-code some usernames and passwords, as a placeholder.
+    def isValidMyTardisUsernameAndPassword(self, realmname, username, password, environ):
 
-        if username=="one" and password=="one":
-            return True
-        if username=="two" and password=="two":
-            return True
-        if username=="three" and password=="three":
-            return True
+        import os
+        import sys
 
-        return False
+        sys.path.append("/opt/mytardis/current/")
+        for egg in os.listdir("/opt/mytardis/current/eggs/"):
+            sys.path.append("/opt/mytardis/current/eggs/" + egg)
+
+        from django.core.management import setup_environ
+        from tardis import settings
+        setup_environ(settings)
+
+        from tardis.tardis_portal.auth.localdb_auth import auth_key as localdb_auth_key
+
+        from django.test.client import Client
+
+        client = Client()
+
+        loginUrl = "/login/"
+
+        client.logout()
+
+        authenticationSuccessful = False
+
+        # For now, we'll try LDAP authentication first, and if that doesn't work,
+        # we'll try local database authentication:
+        response = client.post(loginUrl, {'username': username, 'password': password, 'authMethod': 'ldap'})
+        if response.status_code>=200 and response.status_code<=399:
+            authenticationSuccessful = True
+        else:
+            authenticationSuccessful = False
+        client.logout()
+
+        if authenticationSuccessful==False:
+            response = client.post(loginUrl, {'username': username, 'password': password, 'authMethod': 'localdb'})
+            if response.status_code>=200 and response.status_code<=399:
+                authenticationSuccessful = True
+            else:
+                authenticationSuccessful = False
+            client.logout()
+
+        return authenticationSuccessful
 
     def sendDigestAuthResponse(self, environ, start_response):    
         realmname = self._domaincontroller.getDomainRealm(environ["PATH_INFO"] , environ)
