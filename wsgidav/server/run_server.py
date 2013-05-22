@@ -131,6 +131,14 @@ If no config file is found, a default FilesystemProvider is used."""
                       dest="allow_anonymous", 
                       help="If no users are specified in wsgidav.conf when using the default domain controller, anonymous access will be allowed by default.  Set this option to False to disable anonymous access.")
 
+    parser.add_option("", "--ssl_certificate",
+                      dest="ssl_certificate", 
+                      help="SSL certificate file.")
+
+    parser.add_option("", "--ssl_private_key",
+                      dest="ssl_private_key", 
+                      help="SSL private key file.")
+
 #    parser.add_option("", "--profile",
 #                      action="store_true", dest="profile", 
 #                      help="Profile ")
@@ -255,9 +263,13 @@ def _initConfig():
         else:
             config["allow_anonymous"] = False
 
+    if cmdLineOpts.get("ssl_certificate"):
+        config["ssl_certificate"] = cmdLineOpts.get("ssl_certificate")
+
+    if cmdLineOpts.get("ssl_private_key"):
+        config["ssl_private_key"] = cmdLineOpts.get("ssl_private_key")
+
     return config
-
-
 
 
 def _runPaste(app, config, mode):
@@ -343,8 +355,9 @@ def _runCherryPy(app, config, mode):
 #            server_name=version
             )
 
-        server.ssl_certificate = "/opt/mytardis/current/wsgidav/ssl/server.crt"
-        server.ssl_private_key = "/opt/mytardis/current/wsgidav/ssl/server.key"
+        if config["ssl_certificate"] and config["ssl_private_key"]:
+            server.ssl_certificate = config["ssl_certificate"]
+            server.ssl_private_key = config["ssl_private_key"]
 
         server.start()
     except ImportError, e:

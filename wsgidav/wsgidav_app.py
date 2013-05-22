@@ -89,6 +89,8 @@ DEFAULT_CONFIG = {
     "acceptdigest": True,     # Allow digest authentication, True or False
     "defaultdigest": True,    # True (default digest) or False (default basic)
     "allow_anonymous": True,  # Allow anonymous access if no users are specified in config.
+    "ssl_certificate": None,
+    "ssl_private_key": None,
     
     # Verbose Output
     "verbose": 2,        # 0 - no output (excepting application exceptions)         
