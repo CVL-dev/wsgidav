@@ -226,16 +226,9 @@ class FolderResource(DAVCollection):
         See DAVCollection.getMember()
         """
 
-        #experimentTitle = name
-        #username = self.environ['http_authenticator.username']
-        #name = str(getExperimentIdFromTitle(experimentTitle,username))
-        #name = name.split(" - ")[0]
-
-        #fp = os.path.join(self._filePath, name.decode("utf8"))
         fp = os.path.join(self._filePath, name.split(" - ")[0].decode("utf8"))
         name = name.encode("utf8")
         path = util.joinUri(self.path, name)
-        #print "getMember: fp = " + fp
         if os.path.isdir(fp):
             res = FolderResource(path, self.environ, fp)
         elif os.path.isfile(fp):
@@ -243,9 +236,6 @@ class FolderResource(DAVCollection):
         else:
             _logger.debug("Skipping non-file %s" % fp)
             res = None
-        #if res is not None:
-            #print "res.name = " + res.name
-            #print "res.path = " + res.path
         return res
 
 
