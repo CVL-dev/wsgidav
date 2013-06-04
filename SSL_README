@@ -17,20 +17,8 @@ yum -y install openssl
 # Generate self-signed certificate:
 openssl req -x509 -newkey rsa:2048 -keyout server.key -out server.crt -days 3650 -nodes
 
-vi wsgidav/server/run_server.py
+See these lines in wsgidav.conf for how to specify the SSL certificate and private key:
 
-index 0e4e0b4..5ab73dd 100644
---- a/wsgidav/server/run_server.py
-+++ b/wsgidav/server/run_server.py
-@@ -342,6 +342,10 @@ def _runCherryPy(app, config, mode):
-             app,
- #            server_name=version
-             )
-+
-+        server.ssl_certificate = "/<path>/<to>/server.crt"
-+        server.ssl_private_key = "/<path>/<to>/server.key"
-+
-         server.start()
-     except ImportError, e:
-         if config["verbose"] >= 1:
+ssl_certificate = "/opt/mytardis/current/wsgidav/ssl/server.crt"
+ssl_private_key = "/opt/mytardis/current/wsgidav/ssl/server.key"
 
