@@ -143,12 +143,39 @@ class FolderResource(DAVCollection):
         # Setting the name from the file path should fix the case on Windows
         self.name = os.path.basename(self._filePath)
         self.name = self.name.encode("utf8")
+
+        #print "path = " + path
+        #print "self.path = " + self.path
+
+        pathComponents = self.path.strip("/").split("/")
+        #print "pathComponents[0] = " + pathComponents[0]
+        #print "self.name = " + self.name
+        if self.name==pathComponents[0].split(" - ")[0]:
+            #print "self.name==pathComponents[0].split(\" - \")[0]"
+            experimentID = self.name
+            self.name = experimentID + " - " + getExperimentTitleFromId(experimentID)
+            #print "self.name = " + self.name
+        elif len(pathComponents)>=2 and self.name==pathComponents[1].split(" - ")[0]:
+            #print "self.name==pathComponents[1].split(\" - \")[0]"
+            datasetID = self.name
+            self.name = datasetID + " - " + getDataSetTitleFromId(datasetID) 
+            #print "self.name = " + self.name
+        #else:
+            #print "self.name != pathComponents[0].split(\" - \")[0] and self.name!=pathComponents[1].split(\" - \")[0]"
         
 
     # Getter methods for standard live properties     
     def getCreationDate(self):
         return self.filestat[stat.ST_CTIME]
     def getDisplayName(self):
+        #print "In getDisplayname, self.name = " + self.name
+        #pathComponents = self.path.strip("/").split("/")
+        #if self.name==pathComponents[0]:
+            #experimentID = self.name
+            #return experimentID + " - " + getExperimentTitleFromId(experimentID)
+        #elif len(pathComponents)>=2 and self.name==pathComponents[1]:
+            #datasetID = self.name
+            #return self.name + " - " + getDataSetTitleFromId(datasetID) 
         return self.name
     def getDirectoryInfo(self):
         return None
@@ -188,6 +215,10 @@ class FolderResource(DAVCollection):
             # to the current user:
             if pathComponents[0]=="" and name not in getExperimentIDs(username):
                 continue
+            if pathComponents[0]=="" and name in getExperimentIDs(username):
+                experimentID = name
+                name = experimentID + " - " + getExperimentTitleFromId(experimentID)
+                #print "name = " + name
             name = name.encode("utf8")
             nameList.append(name)
         return nameList
@@ -197,9 +228,17 @@ class FolderResource(DAVCollection):
         
         See DAVCollection.getMember()
         """
-        fp = os.path.join(self._filePath, name.decode("utf8"))
-#        name = name.encode("utf8")
+
+        #experimentTitle = name
+        #username = self.environ['http_authenticator.username']
+        #name = str(getExperimentIdFromTitle(experimentTitle,username))
+        #name = name.split(" - ")[0]
+
+        #fp = os.path.join(self._filePath, name.decode("utf8"))
+        fp = os.path.join(self._filePath, name.split(" - ")[0].decode("utf8"))
+        name = name.encode("utf8")
         path = util.joinUri(self.path, name)
+        #print "getMember: fp = " + fp
         if os.path.isdir(fp):
             res = FolderResource(path, self.environ, fp)
         elif os.path.isfile(fp):
@@ -207,6 +246,9 @@ class FolderResource(DAVCollection):
         else:
             _logger.debug("Skipping non-file %s" % fp)
             res = None
+        #if res is not None:
+            #print "res.name = " + res.name
+            #print "res.path = " + res.path
         return res
 
 
@@ -281,7 +323,8 @@ class MyTardisProvider(DAVProvider):
         """Convert resource path to a unicode absolute file path."""
         assert self.rootFolderPath is not None
         pathInfoParts = path.strip("/").split("/")
-        
+        for i,pathInfoPart in enumerate(pathInfoParts):
+            pathInfoParts[i]= pathInfoPart.split(" - ")[0]
         r = os.path.abspath(os.path.join(self.rootFolderPath, *pathInfoParts))
         if not r.startswith(self.rootFolderPath):
             raise RuntimeError("Security exception: tried to access file outside root.")
@@ -301,7 +344,7 @@ class MyTardisProvider(DAVProvider):
 
         # If the user requests a URL for another user's experiment,
         # raise a 403 Forbidden exception.
-        if pathComponents[0]!="" and pathComponents[0] not in getExperimentIDs(username):
+        if pathComponents[0]!="" and pathComponents[0].split(" - ")[0] not in getExperimentIDs(username):
             raise DAVError(HTTP_FORBIDDEN)               
 
         self._count_getResourceInst += 1
@@ -331,4 +374,35 @@ def getExperimentIDs(webdav_username):
         experimentIDs = experimentIDs + (str(item.experiment.id),)
 
     return experimentIDs
+
+def getExperimentTitleFromId(experiment_id):
+
+    from tardis.tardis_portal.models import Experiment
+
+    experiment = Experiment.objects.get(id=int(experiment_id))
+
+    return str(experiment.title)
+
+def getExperimentIdFromTitle(experiment_title,webdav_username):
+
+    from django.contrib.auth.models import User
+    mytardis_user = User.objects.get(username=webdav_username)
+
+    from tardis.tardis_portal.models.experiment import ExperimentACL
+
+    acl = ExperimentACL.objects.filter(
+        pluginId='django_user',
+        entityId=str(mytardis_user.id))
+
+    for item in acl:
+        if item.experiment.title==experiment_title:
+            return item.experiment.id
+
+def getDataSetTitleFromId(dataset_id):
+
+    from tardis.tardis_portal.models.dataset import Dataset
+
+    dataset = Dataset.objects.get(id=int(dataset_id))
+
+    return str(dataset.description)
 
