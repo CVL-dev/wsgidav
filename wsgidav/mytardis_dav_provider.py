@@ -152,13 +152,13 @@ class FolderResource(DAVCollection):
         #print "self.name = " + self.name
         if self.name==pathComponents[0].split(" - ")[0]:
             #print "self.name==pathComponents[0].split(\" - \")[0]"
-            experimentID = self.name
-            self.name = experimentID + " - " + getExperimentTitleFromId(experimentID)
+            experiment_id = self.name
+            self.name = experiment_id + " - " + getExperimentTitleFromId(experiment_id)
             #print "self.name = " + self.name
         elif len(pathComponents)>=2 and self.name==pathComponents[1].split(" - ")[0]:
             #print "self.name==pathComponents[1].split(\" - \")[0]"
-            datasetID = self.name
-            self.name = datasetID + " - " + getDataSetTitleFromId(datasetID) 
+            dataset_id = self.name
+            self.name = dataset_id + " - " + getDatasetDescriptionFromId(dataset_id) 
             #print "self.name = " + self.name
         #else:
             #print "self.name != pathComponents[0].split(\" - \")[0] and self.name!=pathComponents[1].split(\" - \")[0]"
@@ -168,14 +168,6 @@ class FolderResource(DAVCollection):
     def getCreationDate(self):
         return self.filestat[stat.ST_CTIME]
     def getDisplayName(self):
-        #print "In getDisplayname, self.name = " + self.name
-        #pathComponents = self.path.strip("/").split("/")
-        #if self.name==pathComponents[0]:
-            #experimentID = self.name
-            #return experimentID + " - " + getExperimentTitleFromId(experimentID)
-        #elif len(pathComponents)>=2 and self.name==pathComponents[1]:
-            #datasetID = self.name
-            #return self.name + " - " + getDataSetTitleFromId(datasetID) 
         return self.name
     def getDirectoryInfo(self):
         return None
@@ -216,9 +208,14 @@ class FolderResource(DAVCollection):
             if pathComponents[0]=="" and name not in getExperimentIDs(username):
                 continue
             if pathComponents[0]=="" and name in getExperimentIDs(username):
-                experimentID = name
-                name = experimentID + " - " + getExperimentTitleFromId(experimentID)
+                experiment_id = name
+                name = experiment_id + " - " + getExperimentTitleFromId(experiment_id)
                 #print "name = " + name
+            else:
+                path = self.environ['PATH_INFO'].strip("/").split("/")
+                if len(path)==1:
+                    dataset_id = name
+                    name = dataset_id + " - " + getDatasetDescriptionFromId(dataset_id)
             name = name.encode("utf8")
             nameList.append(name)
         return nameList
@@ -383,22 +380,7 @@ def getExperimentTitleFromId(experiment_id):
 
     return str(experiment.title)
 
-def getExperimentIdFromTitle(experiment_title,webdav_username):
-
-    from django.contrib.auth.models import User
-    mytardis_user = User.objects.get(username=webdav_username)
-
-    from tardis.tardis_portal.models.experiment import ExperimentACL
-
-    acl = ExperimentACL.objects.filter(
-        pluginId='django_user',
-        entityId=str(mytardis_user.id))
-
-    for item in acl:
-        if item.experiment.title==experiment_title:
-            return item.experiment.id
-
-def getDataSetTitleFromId(dataset_id):
+def getDatasetDescriptionFromId(dataset_id):
 
     from tardis.tardis_portal.models.dataset import Dataset
 
