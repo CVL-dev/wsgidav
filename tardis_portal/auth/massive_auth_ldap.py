@@ -61,8 +61,12 @@ class DjangoAuthBackend(AuthProvider):
         authenticated = False
 
         try:
-            command = ['/usr/bin/ldapsearch','-H','ldap://localhost/','-b','cn=users,dc=massive,dc=org,dc=au','-D','uid=%s,cn=users,dc=massive,dc=org,dc=au' % username,'-x','-w',password,'uid=%s' % username]
-            proc = subprocess.Popen(command, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+            command = ['/usr/bin/ldapsearch','-H','ldap://localhost/','-b', \
+                'cn=users,dc=massive,dc=org,dc=au', \
+                '-D','uid=%s,cn=users,dc=massive,dc=org,dc=au' % username, \
+                '-x','-w',password,'uid=%s' % username]
+            proc = subprocess.Popen(command, stdout=subprocess.PIPE, \
+                stderr=subprocess.PIPE)
             stdout, stderr = proc.communicate()
             if proc.returncode!=0:
                 return None
