@@ -5,6 +5,21 @@ MASSIVE LDAP Authentication module.
 
 Assumes that an SSH tunnel is available, forwarding MASSIVE's LDAP
 to localhost::389.
+
+WARNING: This module calls ldapsearch via subprocess.Popen, meaning that
+passwords may be vulnerable to snooping of the ldapsearch process's 
+command-line arguments by users who have SSH access to server.  It would 
+probably be better to use MyTardis's standard LDAP auth plugin or its 
+LDAP web-service auth plugin.
+
+The SSH tunnel looks like this:
+
+nohup autossh -M 0 -i private_key -N -o "ServerAliveInterval 300" -o "ServerAliveCountMax 3" -L 389:m2-w.massive.org.au:389 username@m2.massive.org.au &
+
+where "m2-w.massive.org.au" is the LDAP server which is normally only available
+from within MASSIVE.  The tunnel's remote port number 389 after the 
+"m2-w.massive.org.au" is important, but the local port number could be changed
+from 389 and passed to ldapsearch using its -p option.
 '''
 
 import logging
