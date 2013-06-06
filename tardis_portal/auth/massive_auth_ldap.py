@@ -14,7 +14,9 @@ LDAP web-service auth plugin.
 
 The SSH tunnel looks like this:
 
-nohup autossh -M 0 -i private_key -N -o "ServerAliveInterval 300" -o "ServerAliveCountMax 3" -L 389:m2-w.massive.org.au:389 username@m2.massive.org.au &
+nohup autossh -M 0 -i private_key -N -o "ServerAliveInterval 300" \
+    -o "ServerAliveCountMax 3" -L 389:m2-w.massive.org.au:389 \
+    username@m2.massive.org.au &
 
 where "m2-w.massive.org.au" is the LDAP server which is normally only available
 from within MASSIVE.  The tunnel's remote port number 389 after the 
