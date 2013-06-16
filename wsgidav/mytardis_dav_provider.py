@@ -226,7 +226,11 @@ class FolderResource(DAVCollection):
         See DAVCollection.getMember()
         """
 
-        fp = os.path.join(self._filePath, name.split(" - ")[0].decode("utf8"))
+        pathComponents = self.path.strip("/").split("/")
+        if len(pathComponents)<=1:
+            fp = os.path.join(self._filePath, name.split(" - ")[0].decode("utf8"))
+        else:
+            fp = os.path.join(self._filePath, name.decode("utf8"))
         name = name.encode("utf8")
         path = util.joinUri(self.path, name)
         if os.path.isdir(fp):
