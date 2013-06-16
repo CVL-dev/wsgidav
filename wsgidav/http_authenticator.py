@@ -237,12 +237,13 @@ class HTTPAuthenticator(object):
         client.logout()
 
         # If that doesn't work, we'll try LDAP (Monash Authcate)
-        response = client.post(loginUrl, {'username': username, 'password': password, 'authMethod': 'ldap'})
-        if response.status_code>=200 and response.status_code<=399:
-            authenticationSuccessful = True
-        else:
-            authenticationSuccessful = False
-        client.logout()
+        if authenticationSuccessful==False:
+            response = client.post(loginUrl, {'username': username, 'password': password, 'authMethod': 'ldap'})
+            if response.status_code>=200 and response.status_code<=399:
+                authenticationSuccessful = True
+            else:
+                authenticationSuccessful = False
+            client.logout()
 
         # And if that doesn't work, we'll try local database authentication:
         if authenticationSuccessful==False:
