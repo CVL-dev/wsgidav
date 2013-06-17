@@ -142,7 +142,6 @@ class FolderResource(DAVCollection):
         self.filestat = os.stat(self._filePath)
         # Setting the name from the file path should fix the case on Windows
         self.name = os.path.basename(self._filePath)
-        self.name = self.name.encode("utf8")
 
         #print "path = " + path
         #print "self.path = " + self.path
@@ -162,9 +161,13 @@ class FolderResource(DAVCollection):
             #print "self.name = " + self.name
         #else:
             #print "self.name != pathComponents[0].split(\" - \")[0] and self.name!=pathComponents[1].split(\" - \")[0]"
+
+        self.name = self.name.encode("utf8")
         
 
     # Getter methods for standard live properties     
+    def getContentLength(self):
+        return self.filestat[stat.ST_SIZE]
     def getCreationDate(self):
         return self.filestat[stat.ST_CTIME]
     def getDisplayName(self):
@@ -315,7 +318,8 @@ class MyTardisProvider(DAVProvider):
         assert self.rootFolderPath is not None
         pathInfoParts = path.strip("/").split("/")
         for i,pathInfoPart in enumerate(pathInfoParts):
-            pathInfoParts[i]= pathInfoPart.split(" - ")[0]
+            if i<=1:
+                pathInfoParts[i]= pathInfoPart.split(" - ")[0]
         r = os.path.abspath(os.path.join(self.rootFolderPath, *pathInfoParts))
         if not r.startswith(self.rootFolderPath):
             raise RuntimeError("Security exception: tried to access file outside root.")
