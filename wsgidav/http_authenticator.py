@@ -216,6 +216,30 @@ class HTTPAuthenticator(object):
             _logger.warning("Authentication failed for user '%s', realm '%s'" % (username, realmname))
         return self.sendBasicAuthResponse(environ, start_response)
 
+    def isValidCvlUsernameAndPassword(self, username, password):
+        import sys
+        import requests
+        URL = 'https://cvl.massive.org.au/cvl/index.php/component/users/?view=login'
+        s = requests.session()
+        r = s.get(URL, verify=False)
+        lines = r.text.split("\n")
+        dict = {}
+        for line in lines:
+            if ('input' in line):
+                startIndex = line.find('name="') + 6 
+                endIndex = line.find('"',startIndex)
+                name = line[startIndex:endIndex]
+                startIndex = line.find('value="') + 7
+                endIndex = line.find('"',startIndex)
+                value =  line[startIndex:endIndex]
+                dict[name] = value
+
+        dict['username'] = username
+        dict['password'] = password
+        r = s.post(URL, data=dict)
+        # print "r.status_code = " + str(r.status_code)
+        return 'Forgot your password?' not in r.text
+
     def isValidMyTardisUsernameAndPassword(self, realmname, username, password, environ):
 
         from django.test.client import Client
@@ -228,13 +252,16 @@ class HTTPAuthenticator(object):
 
         authenticationSuccessful = False
 
-        # For now, we'll try MASSIVE LDAP authentication first.
-        response = client.post(loginUrl, {'username': username, 'password': password, 'authMethod': 'massiveldap'})
-        if response.status_code>=200 and response.status_code<=399:
-            authenticationSuccessful = True
-        else:
-            authenticationSuccessful = False
-        client.logout()
+        ## For now, we'll try MASSIVE LDAP authentication first.
+        #response = client.post(loginUrl, {'username': username, 'password': password, 'authMethod': 'massiveldap'})
+        #if response.status_code>=200 and response.status_code<=399:
+            #authenticationSuccessful = True
+        #else:
+            #authenticationSuccessful = False
+        #client.logout()
+
+        # For now, we'll try cvl.massive.org.au authentication first.
+        authenticationSuccessful = self.isValidCvlUsernameAndPassword(username, password)
 
         # If that doesn't work, we'll try LDAP (Monash Authcate)
         if authenticationSuccessful==False:
