@@ -89,6 +89,12 @@ import time
 import re
 import util
 
+import requests
+import json
+import logging
+requests_log = logging.getLogger("requests")
+requests_log.setLevel(logging.WARNING)
+
 _logger = util.getModuleLogger(__name__, True)
 
 # HOTFIX for Windows XP (Microsoft-WebDAV-MiniRedir/5.1.2600):
@@ -217,6 +223,11 @@ class HTTPAuthenticator(object):
         return self.sendBasicAuthResponse(environ, start_response)
 
     def isValidCvlUsernameAndPassword(self, username, password):
+        query_message = {'username': username, 'password': password}
+        r = requests.post('https://cvl.massive.org.au/cvl/authenticate.php', data={'queryMessage': json.dumps({'username': username, 'password': password}), 'query': 'Send to user management'})
+        return r.status_code==200
+
+    def isValidCvlUsernameAndPassword_old(self, username, password):
         import sys
         import requests
         URL = 'https://cvl.massive.org.au/cvl/index.php/component/users/?view=login'
