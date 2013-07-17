@@ -29,6 +29,7 @@ sys.path.append("/opt/mytardis/current/")
 for egg in os.listdir("/opt/mytardis/current/eggs/"):
     sys.path.append("/opt/mytardis/current/eggs/" + egg)
 from django.core.management import setup_environ
+from django.core.exceptions import ObjectDoesNotExist
 from tardis import settings
 setup_environ(settings)
 
@@ -218,7 +219,11 @@ class FolderResource(DAVCollection):
                 path = self.environ['PATH_INFO'].strip("/").split("/")
                 if len(path)==1:
                     dataset_id = name
-                    name = dataset_id + " - " + getDatasetDescriptionFromId(dataset_id)
+                    try:
+                        name = dataset_id + " - " + getDatasetDescriptionFromId(dataset_id)
+                    except ObjectDoesNotExist:
+                        _logger.debug("Dataset ID " + dataset_id + " was found in file store, but has been deleted from database.")
+                        continue
             name = name.encode("utf8")
             nameList.append(name)
         return nameList
